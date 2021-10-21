@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/show_or_hide_system_app"
+        android:title="Show System App"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/refresh"
+        android:title="Refrese App"
+        app:showAsAction="never" />
+</menu>
