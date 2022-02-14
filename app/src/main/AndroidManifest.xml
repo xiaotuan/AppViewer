@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppViewer">
-        <activity android:name=".activity.ApplicationInfoActivity"></activity>
+        <activity android:name=".activity.PackageInfoActivity"></activity>
+        <activity android:name=".activity.ApplicationInfoActivity" />
         <activity
             android:name=".AppViewer"
             android:configChanges="screenLayout|screenSize|keyboardHidden|orientation">

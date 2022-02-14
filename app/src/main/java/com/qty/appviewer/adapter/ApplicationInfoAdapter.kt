@@ -8,7 +8,6 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.qty.appviewer.R
 import com.qty.appviewer.model.ApplicationInfoData
-import com.qty.appviewer.view.MarqueeTextView
 
 class ApplicationInfoAdapter(
     private val context: Context,
@@ -33,7 +32,7 @@ class ApplicationInfoAdapter(
         var holder: ViewHolder? = null
         var view: View? = null
         if (convertView == null) {
-            view = mInflater.inflate(R.layout.application_info_list_item, null)
+            view = mInflater.inflate(R.layout.second_line_list_item, null)
             holder = ViewHolder(view.findViewById(R.id.key), view.findViewById(R.id.value))
             view.tag = holder
         } else {
@@ -57,8 +56,8 @@ class ApplicationInfoAdapter(
     }
 
     private data class ViewHolder(
-        val keyTv: MarqueeTextView,
-        val valueTv: MarqueeTextView
+        val keyTv: TextView,
+        val valueTv: TextView
     )
 
 }

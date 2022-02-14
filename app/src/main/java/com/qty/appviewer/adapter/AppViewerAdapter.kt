@@ -11,7 +11,7 @@ import com.qty.appviewer.R
 import com.qty.appviewer.model.QPackageInfo
 
 class AppViewerAdapter(
-    private val context: Context,
+    context: Context,
     private val apps: ArrayList<QPackageInfo>
     ):BaseAdapter() {
 
@@ -33,7 +33,7 @@ class AppViewerAdapter(
         var holder: ViewHolder?
         var view: View? = null
         if (convertView == null) {
-            view = mInflater.inflate(R.layout.app_list_item, null)
+            view = mInflater.inflate(R.layout.second_line_has_icon_list_item, null)
             holder = ViewHolder(
                 view.findViewById(R.id.app_icon),
                 view.findViewById(R.id.app_name),

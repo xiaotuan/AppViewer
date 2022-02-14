@@ -108,7 +108,9 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         when (mAppInfoLv.adapter.getItem(position) as String) {
             "Package" -> {
-                TODO("Not yet implemented")
+                val pi = Intent(this, PackageInfoActivity::class.java)
+                pi.putExtra(Constant.EXTRA_PACKAGE_NAME, mPackageName)
+                startActivity(pi)
             }
             "Application" -> {
                 var ai = Intent(this, ApplicationInfoActivity::class.java)

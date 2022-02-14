@@ -16,6 +16,7 @@ import com.qty.appviewer.adapter.AppViewerAdapter
 import com.qty.appviewer.model.ApplicationInfoData
 import com.qty.appviewer.model.QPackageInfo
 import com.qty.appviewer.util.Constant
+import com.qty.appviewer.util.Log
 import com.qty.appviewer.util.PackageUtils
 import java.util.*
 import kotlin.Comparator
@@ -34,7 +35,7 @@ class AppViewer : AppCompatActivity(), AdapterView.OnItemClickListener {
         setContentView(R.layout.activity_main)
 
         mAppLv = findViewById(R.id.app_list)
-        mAppLv.setOnItemClickListener(this)
+        mAppLv.onItemClickListener = this
 
         initAppsInfo()
         showInstallPackages()
@@ -100,6 +101,7 @@ class AppViewer : AppCompatActivity(), AdapterView.OnItemClickListener {
         val apps = PackageUtils.getInstallPackages(this)
         mApps = ArrayList<QPackageInfo>()
         for (info in apps) {
+            Log.d(this, "initAppsInfo=>name: " + info.applicationInfo.loadLabel(packageManager))
             var appIcon = info.applicationInfo.loadIcon(packageManager)
             if (appIcon == null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
