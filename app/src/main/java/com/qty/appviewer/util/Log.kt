@@ -13,7 +13,7 @@ class Log {
 
         fun v(prefix: Any?, msg: String): Int {
             return if (VERBOSE) {
-                android.util.Log.v(TAG, getPrefix(prefix) + msg)
+                android.util.Log.v(TAG, "[${getPrefix(prefix)}]${msg}")
             } else {
                 0
             }
@@ -21,7 +21,7 @@ class Log {
 
         fun v(prefix: Any?, msg: String, tr: Throwable): Int {
             return if (VERBOSE) {
-                android.util.Log.v(TAG, getPrefix(prefix) + msg, tr)
+                android.util.Log.v(TAG, "[${getPrefix(prefix)}]${msg}", tr)
             } else {
                 0
             }
@@ -29,7 +29,7 @@ class Log {
 
         fun d(prefix: Any?, msg: String): Int {
             return if (DEBUG) {
-                android.util.Log.d(TAG, getPrefix(prefix) + msg)
+                android.util.Log.d(TAG, "[${getPrefix(prefix)}]${msg}")
             } else {
                 0
             }
@@ -37,7 +37,7 @@ class Log {
 
         fun d(prefix: Any?, msg: String, tr: Throwable): Int {
             return if (DEBUG) {
-                android.util.Log.d(TAG, getPrefix(prefix) + msg, tr)
+                android.util.Log.d(TAG, "[${getPrefix(prefix)}]${msg}", tr)
             } else {
                 0
             }
@@ -45,7 +45,7 @@ class Log {
 
         fun i(prefix: Any?, msg: String): Int {
             return if (INFO) {
-                android.util.Log.i(TAG, getPrefix(prefix) + msg)
+                android.util.Log.i(TAG, "[${getPrefix(prefix)}]${msg}")
             } else {
                 0
             }
@@ -53,7 +53,7 @@ class Log {
 
         fun i(prefix: Any?, msg: String, tr: Throwable): Int {
             return if (INFO) {
-                android.util.Log.i(TAG, getPrefix(prefix) + msg, tr)
+                android.util.Log.i(TAG, "[${getPrefix(prefix)}]${msg}", tr)
             } else {
                 0
             }
@@ -61,7 +61,7 @@ class Log {
 
         fun w(prefix: Any?, msg: String): Int {
             return if (WARN) {
-                android.util.Log.w(TAG, getPrefix(prefix) + msg)
+                android.util.Log.w(TAG, "[${getPrefix(prefix)}]${msg}")
             } else {
                 0
             }
@@ -69,7 +69,7 @@ class Log {
 
         fun w(prefix: Any?, msg: String, tr: Throwable): Int {
             return if (WARN) {
-                android.util.Log.w(TAG, getPrefix(prefix) + msg, tr)
+                android.util.Log.w(TAG, "[${getPrefix(prefix)}]${msg}", tr)
             } else {
                 0
             }
@@ -77,7 +77,7 @@ class Log {
 
         fun e(prefix: Any?, msg: String): Int {
             return if (ERROR) {
-                android.util.Log.e(TAG, getPrefix(prefix) + msg)
+                android.util.Log.e(TAG, "[${getPrefix(prefix)}]${msg}")
             } else {
                 0
             }
@@ -85,7 +85,7 @@ class Log {
 
         fun e(prefix: Any?, msg: String, tr: Throwable): Int {
             return if (ERROR) {
-                android.util.Log.e(TAG, getPrefix(prefix) + msg, tr)
+                android.util.Log.e(TAG, "[${getPrefix(prefix)}]${msg}", tr)
             } else {
                 0
             }
