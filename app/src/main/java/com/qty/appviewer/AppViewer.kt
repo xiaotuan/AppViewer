@@ -2,7 +2,6 @@ package com.qty.appviewer
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,7 +12,6 @@ import android.widget.AdapterView
 import android.widget.ListView
 import com.qty.appviewer.activity.AppInfoActivity
 import com.qty.appviewer.adapter.AppViewerAdapter
-import com.qty.appviewer.model.ApplicationInfoData
 import com.qty.appviewer.model.QPackageInfo
 import com.qty.appviewer.util.Constant
 import com.qty.appviewer.util.Log

@@ -16,7 +16,6 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.core.view.WindowCompat
 import com.qty.appviewer.R
 import com.qty.appviewer.util.Constant
 import java.io.*
@@ -97,7 +96,7 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
             }
 
             R.id.start_app -> {
-                var app = Intent()
+                val app = Intent()
                 app.component = ComponentName(mPackageName, mAppMainActivity)
                 app.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(app)
@@ -113,14 +112,11 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                 startActivity(pi)
             }
             "Application" -> {
-                var ai = Intent(this, ApplicationInfoActivity::class.java)
+                val ai = Intent(this, ApplicationInfoActivity::class.java)
                 ai.putExtra(Constant.EXTRA_PACKAGE_NAME, mPackageName)
                 startActivity(ai)
             }
             "Configuration" -> {
-                TODO("Not yet implemented")
-            }
-            "Permission" -> {
                 TODO("Not yet implemented")
             }
             "Activity" -> {
@@ -152,9 +148,9 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                                 or PackageManager.GET_PROVIDERS
                                 or PackageManager.GET_PERMISSIONS
                                 or PackageManager.GET_CONFIGURATIONS)
-                    mPackageInfo?.let { it ->
-                        mAppName = it.applicationInfo.loadLabel(packageManager).toString()
-                        mAppIcon = it.applicationInfo.loadIcon(packageManager)
+                    mPackageInfo?.let { pi ->
+                        mAppName = pi.applicationInfo.loadLabel(packageManager).toString()
+                        mAppIcon = pi.applicationInfo.loadIcon(packageManager)
                             ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 getDrawable(R.mipmap.ic_launcher_round)!!
                             } else {
@@ -163,28 +159,41 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                         val appIntent = Intent(Intent.ACTION_MAIN)
                         appIntent.addCategory(Intent.CATEGORY_HOME)
                         appIntent.`package` = mPackageName
-                        var resolvers =
+                        var resolvers = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             packageManager.queryIntentActivities(
                                 appIntent,
                                 PackageManager.MATCH_ALL
                             )
+                        } else {
+                            packageManager.queryIntentActivities(
+                                appIntent,
+                                0
+                            )
+                        }
                         if (resolvers.size > 0) {
                             mAppMainActivity = resolvers[0].activityInfo.name
                             isEnabled = resolvers[0].activityInfo.isEnabled
                         } else {
                             appIntent.removeCategory(Intent.CATEGORY_HOME)
                             appIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-                            resolvers = packageManager.queryIntentActivities(
-                                appIntent,
-                                PackageManager.MATCH_ALL
-                            )
+                            resolvers = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                packageManager.queryIntentActivities(
+                                    appIntent,
+                                    PackageManager.MATCH_ALL
+                                )
+                            } else {
+                                packageManager.queryIntentActivities(
+                                    appIntent,
+                                    0
+                                )
+                            }
                             if (resolvers.size > 0) {
                                 mAppMainActivity = resolvers[0].activityInfo.name
                                 isEnabled = resolvers[0].activityInfo.isEnabled
                             }
                         }
-                        mAppApkPath = it.applicationInfo.sourceDir
-                        mAppVersion = it.versionName
+                        mAppApkPath = pi.applicationInfo.sourceDir
+                        mAppVersion = pi.versionName
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "initAppInfo=>error: ", e)
@@ -208,12 +217,6 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
             mInfos.add("Package")
             mInfos.add("Application")
             mPackageInfo?.let {
-                if (it.configPreferences != null && it.configPreferences.isNotEmpty()) {
-                    mInfos.add("Configuration")
-                }
-                if (it.permissions != null && it.permissions.isNotEmpty()) {
-                    mInfos.add("Permission")
-                }
                 if (it.activities != null && it.activities.isNotEmpty()) {
                     mInfos.add("Activity")
                 }
@@ -227,7 +230,8 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                     mInfos.add("Content Provider")
                 }
             }
-            mAppInfoLv.adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, mInfos)
+            mInfos.sortWith { a, b -> a.compareTo(b) }
+            mAppInfoLv.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, mInfos)
         } else {
             mContainer.visibility = View.GONE
         }
@@ -245,7 +249,7 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                 mPackageInfo?.applicationInfo?.splitSourceDirs?.let {
                     dir =
                         getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!.absolutePath + File.separator + mAppName
-                    var dirFile = File(dir)
+                    val dirFile = File(dir)
                     if (!dirFile.exists() || !dirFile.isDirectory) {
                         try {
                             dirFile.mkdirs()
@@ -262,7 +266,7 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                             targetFile = File(targetPath)
                             result = copyfile(apkFile, targetFile)
                             if (!result) {
-                                break;
+                                break
                             }
                         }
                     }
@@ -293,7 +297,7 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
         try {
             input = FileInputStream(sourceFile)
             output = FileOutputStream(target)
-            var buf = ByteArray(1024)
+            val buf = ByteArray(1024)
             var count = input.read(buf)
             while (count > 0) {
                 output.write(buf, 0, count)

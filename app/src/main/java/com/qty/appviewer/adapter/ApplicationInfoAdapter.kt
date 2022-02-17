@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.qty.appviewer.R
-import com.qty.appviewer.model.ApplicationInfoData
+import com.qty.appviewer.model.InfoItem
 
 class ApplicationInfoAdapter(
     private val context: Context,
-    private val infoList: ArrayList<ApplicationInfoData>
+    private val infoList: ArrayList<InfoItem>
 ): BaseAdapter() {
 
     private val mInflater: LayoutInflater = LayoutInflater.from(context)
@@ -20,7 +20,7 @@ class ApplicationInfoAdapter(
         return infoList.size
     }
 
-    override fun getItem(position: Int): ApplicationInfoData {
+    override fun getItem(position: Int): InfoItem {
         return infoList[position]
     }
 
@@ -41,16 +41,9 @@ class ApplicationInfoAdapter(
         }
         val item = infoList[position]
         holder?.let {
-            it.keyTv.text = item.key
+            it.keyTv.text = item.title
             it.valueTv.text = item.value
-            when (item.key) {
-                "Shared Library Files", "Split Names", "Split Public Source Dirs", "Split Source Dirs", "Meta Data" -> {
-                    it.valueTv.visibility = View.GONE
-                }
-                else -> {
-                    it.valueTv.visibility = View.VISIBLE
-                }
-            }
+            it.valueTv.visibility = if (item.hasSub) View.GONE else View.VISIBLE
         }
         return view!!
     }

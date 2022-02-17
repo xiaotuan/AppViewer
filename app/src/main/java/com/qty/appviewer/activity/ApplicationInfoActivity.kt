@@ -1,5 +1,7 @@
 package com.qty.appviewer.activity
 
+import android.content.DialogInterface
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -8,19 +10,18 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
+import androidx.appcompat.app.AlertDialog
 import com.qty.appviewer.R
 import com.qty.appviewer.adapter.ApplicationInfoAdapter
-import com.qty.appviewer.model.ApplicationInfoData
+import com.qty.appviewer.model.InfoItem
 import com.qty.appviewer.util.Constant
-import java.util.*
-import kotlin.Comparator
 import kotlin.collections.ArrayList
 
 class ApplicationInfoActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private lateinit var mInfoLv: ListView
-    private lateinit var mAdapter: ApplicationInfoAdapter
-    private val mInfos: ArrayList<ApplicationInfoData> = ArrayList()
+    private var mPackageInfo: PackageInfo? = null
+    private val mInfos: ArrayList<InfoItem> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,21 +49,21 @@ class ApplicationInfoActivity : AppCompatActivity(), AdapterView.OnItemClickList
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        when ((mInfoLv.adapter.getItem(position) as ApplicationInfoData).key) {
+        when ((mInfoLv.adapter.getItem(position) as InfoItem).title) {
             "Shared Library Files" -> {
-                TODO("Not yet implemented")
+                showSharedLibraryFilesDialog()
             }
             "Split Names" -> {
-                TODO("Not yet implemented")
+                showSplitNamesDialog()
             }
             "Split Public Source Dirs" -> {
-                TODO("Not yet implemented")
+                showSplitPublicSourceDirsDialog()
             }
             "Split Source Dirs" -> {
-                TODO("Not yet implemented")
+                showSplitSourceDirsDialog()
             }
             "Meta Data" -> {
-                TODO("Not yet implemented")
+                showMetaDataDialog()
             }
         }
 
@@ -70,85 +71,127 @@ class ApplicationInfoActivity : AppCompatActivity(), AdapterView.OnItemClickList
 
     private fun initApplicationInfos() {
         intent?.let {
-            val packageNanme = it.getStringExtra(Constant.EXTRA_PACKAGE_NAME)
-            packageNanme?.let { pn ->
-                val packageInfo = packageManager.getPackageInfo(pn,
+            val pn = it.getStringExtra(Constant.EXTRA_PACKAGE_NAME)
+            pn?.let { p ->
+                val context = createPackageContext(p, CONTEXT_IGNORE_SECURITY)
+                mPackageInfo = packageManager.getPackageInfo(p,
                     PackageManager.GET_META_DATA or PackageManager.GET_GIDS)
-                packageInfo?.let { pi ->
+                mPackageInfo?.apply {
                     mInfos.clear()
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        mInfos.add(ApplicationInfoData("App Component Factory", pi.applicationInfo.appComponentFactory ?: ""))
+                        if (!applicationInfo.appComponentFactory.isNullOrEmpty()) {
+                            mInfos.add(InfoItem("App Component Factory", applicationInfo.appComponentFactory, false))
+                        }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        mInfos.add(ApplicationInfoData("Category", pi.applicationInfo.category.toString()))
-                        mInfos.add(ApplicationInfoData("Storage Uuid", pi.applicationInfo.storageUuid.toString()))
-                        pi.applicationInfo.splitNames?.let { sn -> {
-                            if (sn.isNotEmpty()) {
-                                mInfos.add(ApplicationInfoData("Split Names", ""))
-                            }
-                        } }
+                        mInfos.add(InfoItem("Category", applicationInfo.category.toString(), false))
+                        if (applicationInfo.storageUuid != null) {
+                            mInfos.add(InfoItem("Storage Uuid", applicationInfo.storageUuid.toString(), false))
+                        }
+                        if (!applicationInfo.splitNames.isNullOrEmpty()) {
+                            mInfos.add(InfoItem("Split Names", "", true))
+                        }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        pi.applicationInfo.splitPublicSourceDirs?.let { spsd ->
-                            if (spsd.isNotEmpty()) {
-                                mInfos.add(ApplicationInfoData("Split Public Source Dirs", ""))
-                            }
+                        if (!applicationInfo.splitPublicSourceDirs.isNullOrEmpty()) {
+                            mInfos.add(InfoItem("Split Public Source Dirs", "", true))
                         }
-                        pi.applicationInfo.splitSourceDirs?.let { ssd -> {
-                            if (ssd.isNotEmpty()) {
-                                mInfos.add(ApplicationInfoData("Split Source Dirs", ""))
-                            }
-                        }}
+                        if (!applicationInfo.splitSourceDirs.isNullOrEmpty()) {
+                            mInfos.add(InfoItem("Split Source Dirs", "", true))
+                        }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        mInfos.add(ApplicationInfoData("Min Sdk Version", pi.applicationInfo.minSdkVersion.toString()))
-                        mInfos.add(ApplicationInfoData("Device Protected Data Dir", pi.applicationInfo.deviceProtectedDataDir ?: ""))
+                        mInfos.add(InfoItem("Min Sdk Version",applicationInfo.minSdkVersion.toString(), false))
+                        if (!applicationInfo.deviceProtectedDataDir.isNullOrEmpty()) {
+                            mInfos.add(InfoItem("Device Protected Data Dir", applicationInfo.deviceProtectedDataDir, false))
+                        }
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        mInfos.add(ApplicationInfoData("GWP Asan Mode", pi.applicationInfo.gwpAsanMode.toString()))
+                        mInfos.add(InfoItem("GWP Asan Mode", applicationInfo.gwpAsanMode.toString(), false))
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        mInfos.add(ApplicationInfoData("Resource Overlay", pi.applicationInfo.isResourceOverlay.toString()))
-                        mInfos.add(ApplicationInfoData("Profileable By Shell", pi.applicationInfo.isProfileableByShell.toString()))
+                        mInfos.add(InfoItem("Resource Overlay", applicationInfo.isResourceOverlay.toString(), false))
+                        mInfos.add(InfoItem("Profileable By Shell", applicationInfo.isProfileableByShell.toString(), false))
                     }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                        mInfos.add(ApplicationInfoData("Virtual Prelaod", pi.applicationInfo.isVirtualPreload.toString()))
+                        mInfos.add(InfoItem("Virtual Prelaod", applicationInfo.isVirtualPreload.toString(), false))
                     }
-                    pi.applicationInfo.sharedLibraryFiles?.let { slf -> {
-                        if (slf.isNotEmpty()) {
-                            mInfos.add(ApplicationInfoData("Shared Library Files", ""))
-                        }
-                    } }
-                    pi.applicationInfo.metaData?.let { md -> {
-                        if (md.keySet().isNotEmpty()) {
-                            mInfos.add(ApplicationInfoData("Meta Data", ""))
-                        }
-                    } }
-                    mInfos.add(ApplicationInfoData("Backup Agent Name", pi.applicationInfo.backupAgentName ?: ""))
-                    mInfos.add(ApplicationInfoData("Class Name", pi.applicationInfo.className ?: ""))
-                    mInfos.add(ApplicationInfoData("Data Dir", pi.applicationInfo.dataDir ?: ""))
-                    mInfos.add(ApplicationInfoData("Manager Space Activity Name", pi.applicationInfo.manageSpaceActivityName ?: ""))
-                    mInfos.add(ApplicationInfoData("Native Library Dir", pi.applicationInfo.nativeLibraryDir ?: ""))
-                    mInfos.add(ApplicationInfoData("Process Name", pi.applicationInfo.processName ?: ""))
-                    mInfos.add(ApplicationInfoData("Public Source Dir", pi.applicationInfo.publicSourceDir ?: ""))
-                    mInfos.add(ApplicationInfoData("Source Dir", pi.applicationInfo.sourceDir ?: ""))
-                    mInfos.add(ApplicationInfoData("Task Affinity", pi.applicationInfo.taskAffinity ?: ""))
-                    mInfos.add(ApplicationInfoData("Name", pi.applicationInfo.name ?: ""))
-                    mInfos.add(ApplicationInfoData("Compatible Width Limit Dp", pi.applicationInfo.compatibleWidthLimitDp.toString()))
-                    mInfos.add(ApplicationInfoData("Description Res", pi.applicationInfo.descriptionRes.toString()))
-                    mInfos.add(ApplicationInfoData("Enabled", pi.applicationInfo.enabled.toString()))
-                    mInfos.add(ApplicationInfoData("Flags", pi.applicationInfo.flags.toString()))
-                    mInfos.add(ApplicationInfoData("Largest Width Limit Dp", pi.applicationInfo.largestWidthLimitDp.toString()))
-                    mInfos.add(ApplicationInfoData("Requires Smallest Width Dp", pi.applicationInfo.requiresSmallestWidthDp.toString()))
-                    mInfos.add(ApplicationInfoData("Target Sdk Version", pi.applicationInfo.targetSdkVersion.toString()))
-                    mInfos.add(ApplicationInfoData("Theme", pi.applicationInfo.theme.toString()))
-                    mInfos.add(ApplicationInfoData("UI Options", pi.applicationInfo.uiOptions.toString()))
-                    mInfos.add(ApplicationInfoData("Uid", pi.applicationInfo.uid.toString()))
-                    mInfos.add(ApplicationInfoData("Non Localized Label", pi.applicationInfo.nonLocalizedLabel?.toString() ?: ""))
-                    mInfos.add(ApplicationInfoData("Icon", pi.applicationInfo.icon.toString()))
-                    mInfos.add(ApplicationInfoData("Label Res", pi.applicationInfo.labelRes.toString()))
 
-                    Collections.sort(mInfos, Comparator<ApplicationInfoData> { a1, a2 -> a1.key.compareTo(a2.key) })
+                    if (!applicationInfo.sharedLibraryFiles.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Shared Library Files", "", true))
+                    }
+
+                    if (applicationInfo.metaData?.isEmpty == false) {
+                        mInfos.add(InfoItem("Meta Data", "", true))
+                    }
+
+                    if (!applicationInfo.backupAgentName.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Backup Agent Name", applicationInfo.backupAgentName, false))
+                    }
+
+                    if (!applicationInfo.className.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Class Name", applicationInfo.className, false))
+                    }
+
+                    if (!applicationInfo.dataDir.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Data Dir", applicationInfo.dataDir, false))
+                    }
+
+                    if (!applicationInfo.manageSpaceActivityName.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Manager Space Activity Name", applicationInfo.manageSpaceActivityName, false))
+                    }
+
+                    if (!applicationInfo.nativeLibraryDir.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Native Library Dir", applicationInfo.nativeLibraryDir, false))
+                    }
+
+                    if (!applicationInfo.processName.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Process Name", applicationInfo.processName, false))
+                    }
+
+                    if (!applicationInfo.publicSourceDir.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Public Source Dir", applicationInfo.publicSourceDir, false))
+                    }
+
+                    if (!applicationInfo.sourceDir.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Source Dir", applicationInfo.sourceDir, false))
+                    }
+
+                    if (!applicationInfo.taskAffinity.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Task Affinity", applicationInfo.taskAffinity, false))
+                    }
+
+                    if(!applicationInfo.name.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Name", applicationInfo.name, false))
+                    }
+
+                    mInfos.add(InfoItem("Compatible Width Limit Dp", applicationInfo.compatibleWidthLimitDp.toString(), false))
+
+                    if (applicationInfo.descriptionRes > 0) {
+                        mInfos.add(InfoItem("Description Res", context.resources.getString(applicationInfo.descriptionRes), false))
+                    }
+
+                    mInfos.add(InfoItem("Enabled", applicationInfo.enabled.toString(), false))
+                    mInfos.add(InfoItem("Flags", applicationInfo.flags.toString(), false))
+                    mInfos.add(InfoItem("Largest Width Limit Dp", applicationInfo.largestWidthLimitDp.toString(), false))
+                    mInfos.add(InfoItem("Requires Smallest Width Dp", applicationInfo.requiresSmallestWidthDp.toString(), false))
+                    mInfos.add(InfoItem("Target Sdk Version", applicationInfo.targetSdkVersion.toString(), false))
+                    if (applicationInfo.theme > 0) {
+                        mInfos.add(InfoItem("Theme", context.resources.getResourceName(applicationInfo.theme), false))
+                    }
+                    mInfos.add(InfoItem("UI Options", applicationInfo.uiOptions.toString(), false))
+                    mInfos.add(InfoItem("Uid", applicationInfo.uid.toString(), false))
+                    if (!applicationInfo.nonLocalizedLabel.isNullOrEmpty()) {
+                        mInfos.add(InfoItem("Non Localized Label", applicationInfo.nonLocalizedLabel.toString(), false))
+                    }
+                    if (applicationInfo.icon > 0) {
+                        mInfos.add(InfoItem("Icon", context.resources.getResourceName(applicationInfo.icon), false))
+                    }
+                    if (applicationInfo.labelRes > 0) {
+                        mInfos.add(InfoItem("Label Res", context.resources.getResourceName(applicationInfo.labelRes), false))
+                    }
+
+                    mInfos.sortWith { a1, a2 -> a1.title.compareTo(a2.title) }
                 }
             }
         }
@@ -156,6 +199,77 @@ class ApplicationInfoActivity : AppCompatActivity(), AdapterView.OnItemClickList
 
     private fun updateListView() {
         mInfoLv.adapter = ApplicationInfoAdapter(this, mInfos)
+    }
+
+    private fun showSharedLibraryFilesDialog() {
+        mPackageInfo?.let {
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Shared Library Files")
+                .setItems(it.applicationInfo.sharedLibraryFiles, null)
+                .setPositiveButton(android.R.string.ok
+                ) { dialog, _ -> dialog?.dismiss() }
+                .create()
+            dialog.show()
+        }
+    }
+
+    private fun showSplitNamesDialog() {
+        mPackageInfo?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("Shared Library Files")
+                    .setItems(it.applicationInfo.splitNames, null)
+                    .setPositiveButton(android.R.string.ok
+                    ) { dialog, _ -> dialog?.dismiss() }
+                    .create()
+                dialog.show()
+            }
+        }
+    }
+
+    private fun showSplitPublicSourceDirsDialog() {
+        mPackageInfo?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("Shared Library Files")
+                    .setItems(it.applicationInfo.splitPublicSourceDirs, null)
+                    .setPositiveButton(android.R.string.ok
+                    ) { dialog, _ -> dialog?.dismiss() }
+                    .create()
+                dialog.show()
+            }
+        }
+    }
+
+    private fun showSplitSourceDirsDialog() {
+        mPackageInfo?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val dialog = AlertDialog.Builder(this)
+                    .setTitle("Shared Library Files")
+                    .setItems(it.applicationInfo.splitSourceDirs, null)
+                    .setPositiveButton(android.R.string.ok
+                    ) { dialog, _ -> dialog?.dismiss() }
+                    .create()
+                dialog.show()
+            }
+        }
+    }
+
+    private fun showMetaDataDialog() {
+        mPackageInfo?.let {
+            val metaDatas = ArrayList<String>()
+            for (key in it.applicationInfo.metaData.keySet()) {
+                metaDatas.add("$key: ${it.applicationInfo.metaData.get(key)?.toString()}")
+            }
+            val mds = Array(metaDatas.size) { i -> metaDatas[i] }
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Meta Data")
+                .setItems(mds, null)
+                .setPositiveButton(android.R.string.ok
+                ) { dialog, _ -> dialog?.dismiss() }
+                .create()
+            dialog.show()
+        }
     }
 
     companion object {

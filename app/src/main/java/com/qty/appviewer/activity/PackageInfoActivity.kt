@@ -190,6 +190,8 @@ class PackageInfoActivity : AppCompatActivity(), AdapterView.OnItemClickListener
                     mPackageInfos.add(InfoItem("Split Revision Codes", null/*it.splitRevisionCodes*/, true))
                 }
             }
+
+            mPackageInfos.sortWith { a1, a2 -> a1.title.compareTo(a2.title) }
         }
     }
 
@@ -231,6 +233,8 @@ class PackageInfoActivity : AppCompatActivity(), AdapterView.OnItemClickListener
                 val dialog = AlertDialog.Builder(this)
                     .setTitle("Feature Groups")
                     .setItems(features, null)
+                    .setPositiveButton(android.R.string.ok
+                    ) { dialog, _ -> dialog?.dismiss() }
                     .create()
                 dialog.show()
             }
@@ -251,6 +255,8 @@ class PackageInfoActivity : AppCompatActivity(), AdapterView.OnItemClickListener
             val dialog = AlertDialog.Builder(this)
                 .setTitle("Gids")
                 .setItems(gidsArray, null)
+                .setPositiveButton(android.R.string.ok
+                ) { dialog, _ -> dialog?.dismiss() }
                 .create()
             dialog.show()
         }
