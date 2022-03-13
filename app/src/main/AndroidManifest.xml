@@ -7,7 +7,8 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
     <application
@@ -17,7 +18,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppViewer">
-
+        <activity android:name=".activity.ActivitiesActivity"></activity>
         <activity
             android:name=".AppViewer"
             android:configChanges="screenLayout|screenSize|keyboardHidden|orientation">
@@ -27,15 +28,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.AppInfoActivity"
             android:configChanges="screenLayout|screenSize|keyboardHidden|orientation" />
-
         <activity android:name=".activity.PackageInfoActivity" />
-
         <activity android:name=".activity.ApplicationInfoActivity" />
-
     </application>
 
 </manifest>

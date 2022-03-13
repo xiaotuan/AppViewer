@@ -51,9 +51,9 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mContainer = findViewById(R.id.container)
-        mAppIconIv = findViewById(R.id.app_icon)
-        mAppNameTv = findViewById(R.id.app_name)
-        mAppPackageNameTv = findViewById(R.id.app_package_name)
+        mAppIconIv = findViewById(R.id.icon)
+        mAppNameTv = findViewById(R.id.title)
+        mAppPackageNameTv = findViewById(R.id.sub_title)
         mAppMainActivityTv = findViewById(R.id.app_main_activity)
         mAppVersionTv = findViewById(R.id.app_version)
         mCopyApkBtn = findViewById(R.id.copy_apk)
@@ -116,19 +116,18 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                 ai.putExtra(Constant.EXTRA_PACKAGE_NAME, mPackageName)
                 startActivity(ai)
             }
-            "Configuration" -> {
-                TODO("Not yet implemented")
-            }
             "Activity" -> {
-                TODO("Not yet implemented")
-            }
-            "Service" -> {
-                TODO("Not yet implemented")
+                val ai = Intent(this, ActivitiesActivity::class.java)
+                ai.putExtra(Constant.EXTRA_PACKAGE_NAME, mPackageName)
+                startActivity(ai)
             }
             "Broadcast Receiver" -> {
                 TODO("Not yet implemented")
             }
             "Content Provider" -> {
+                TODO("Not yet implemented")
+            }
+            "Service" -> {
                 TODO("Not yet implemented")
             }
         }
@@ -220,17 +219,17 @@ class AppInfoActivity : AppCompatActivity(), View.OnClickListener, AdapterView.O
                 if (it.activities != null && it.activities.isNotEmpty()) {
                     mInfos.add("Activity")
                 }
-                if (it.services != null && it.services.isNotEmpty()) {
-                    mInfos.add("Service")
-                }
                 if (it.receivers != null && it.receivers.isNotEmpty()) {
                     mInfos.add(("Broadcast Receiver"))
                 }
                 if (it.providers != null && it.providers.isNotEmpty()) {
                     mInfos.add("Content Provider")
                 }
+                if (it.services != null && it.services.isNotEmpty()) {
+                    mInfos.add("Service")
+                }
             }
-            mInfos.sortWith { a, b -> a.compareTo(b) }
+//            mInfos.sortWith { a, b -> a.compareTo(b) }
             mAppInfoLv.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, mInfos)
         } else {
             mContainer.visibility = View.GONE

@@ -35,9 +35,9 @@ class AppViewerAdapter(
         if (convertView == null) {
             view = mInflater.inflate(R.layout.second_line_has_icon_list_item, null)
             holder = ViewHolder(
-                view.findViewById(R.id.app_icon),
-                view.findViewById(R.id.app_name),
-                view.findViewById(R.id.app_package_name)
+                view.findViewById(R.id.icon),
+                view.findViewById(R.id.title),
+                view.findViewById(R.id.sub_title)
             )
             view.tag = holder
         } else {
