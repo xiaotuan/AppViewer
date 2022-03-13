@@ -1,7 +1,7 @@
 package com.qty.appviewer.activity
 
 import android.content.Context
-import android.content.pm.ActivityInfo
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -25,7 +25,7 @@ class ActivitiesActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_info)
+        setContentView(R.layout.activities)
 
         title = "Activities"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -57,7 +57,13 @@ class ActivitiesActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
+        Log.d(TAG, "onItemClick=>position: $position")
+        val item = mListView.adapter.getItem(position) as QActivityInfo
+        val activityInfo = Intent(this, ActivityInfoActivity::class.java)
+        activityInfo.putExtra("name", item.name)
+        activityInfo.putExtra("package_name", mPackageName)
+        activityInfo.putExtra("class_name", item.className)
+        startActivity(activityInfo)
     }
 
     fun queryActivities() {
