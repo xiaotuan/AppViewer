@@ -77,9 +77,7 @@ class ActivitiesActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                         val otherContext =
                             createPackageContext(packageName, Context.CONTEXT_IGNORE_SECURITY)
                         icon = otherContext.resources.getDrawable(ai.iconResource)
-                    } catch (e: Resources.NotFoundException) {
-                        Log.e(TAG, "queryActivities=>error: ", e)
-                    }
+                    } catch (ignore: Resources.NotFoundException) { }
                     if (icon == null) {
                         icon = ai.loadIcon(packageManager)
                         if (icon == null) {

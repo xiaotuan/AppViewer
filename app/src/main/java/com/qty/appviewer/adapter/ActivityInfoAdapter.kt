@@ -45,7 +45,12 @@ class ActivityInfoAdapter(
         var item = mInfos[position]
         holder?.let {
             it.titleTv.text = item.title
-            it.subTitleTv.text = item.value
+            if (item.hasSub) {
+                it.subTitleTv.visibility = View.GONE
+            } else {
+                it.subTitleTv.visibility = View.VISIBLE
+                it.subTitleTv.text = item.value
+            }
         }
         return view!!
     }
